@@ -653,6 +653,15 @@ footer a:hover { color: var(--green); }
   .guarantee-box { padding: 28px 18px; }
 }
 </style>
+
+<!-- Google Analytics 4 — reemplaza G-PLACEHOLDER con tu Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PLACEHOLDER"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PLACEHOLDER');
+</script>
 </head>
 <body>
 
@@ -1186,8 +1195,17 @@ footer a:hover { color: var(--green); }
         document.getElementById('femail').focus();
         return;
       }
-      // Aqui puedes hacer un fetch/POST a tu ESP (ActiveCampaign, etc.) antes de redirigir
-      window.location.href = 'https://a19909gc38wkds68kgrg260y4n.hop.clickbank.net';
+      // Guardar lead en Systeme.io antes de redirigir
+      fetch('https://api.systeme.io/api/contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': 'hnzdzvx5l96yds2br14p876dapvucrdtl643e5x333xcrqo5w3xb0zgu92hk08nx'
+        },
+        body: JSON.stringify({ email: email, first_name: name, tags: ['citrusburn', 'landing'] })
+      }).catch(function(){}).finally(function(){
+        window.location.href = 'https://a19909gc38wkds68kgrg260y4n.hop.clickbank.net';
+      });
     });
   }
 
@@ -1235,6 +1253,26 @@ footer a:hover { color: var(--green); }
     for (var i = 0; i < fadeEls.length; i++) {
       fadeEls[i].classList.add('visible');
     }
+  }
+
+  /* ---- TRACKING GA4 — clics en botones CTA ---- */
+  document.querySelectorAll('.btn-cta, .btn-cta-large, #float-btn').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var label = (el.textContent || el.innerText).trim().substring(0, 60);
+      gtag('event', 'cta_click', {
+        event_category: 'CTA',
+        event_label: label,
+        page: 'quema_grasa'
+      });
+    });
+  });
+
+  /* ---- FORM SUBMIT también trackea ---- */
+  var formEl = document.getElementById('lead-form');
+  if (formEl) {
+    formEl.addEventListener('submit', function () {
+      gtag('event', 'form_submit', { event_category: 'Lead', event_label: 'formulario_hero', page: 'quema_grasa' });
+    }, true); // capture: true para que corra antes del preventDefault
   }
 
   /* ---- BOTON FLOTANTE: se oculta cuando el formulario del hero es visible ---- */
